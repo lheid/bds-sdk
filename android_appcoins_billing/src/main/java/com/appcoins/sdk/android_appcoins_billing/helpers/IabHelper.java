@@ -16,12 +16,15 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.appcoins.sdk.android_appcoins_billing.BuildConfig;
+import com.appcoins.sdk.android_appcoins_billing.exception.IabException;
+import com.appcoins.sdk.android_appcoins_billing.listeners.ConsumeResponseListener;
 import com.appcoins.sdk.android_appcoins_billing.types.IabResult;
 import com.appcoins.sdk.android_appcoins_billing.service.WalletBillingService;
 import com.appcoins.sdk.android_appcoins_billing.exception.IabAsyncInProgressException;
 import com.appcoins.sdk.android_appcoins_billing.listeners.OnIabPurchaseFinishedListener;
 import com.appcoins.sdk.android_appcoins_billing.listeners.OnIabSetupFinishedListener;
 import com.appcoins.sdk.android_appcoins_billing.listeners.OnSkuDetailsResponseListener;
+import com.appcoins.sdk.android_appcoins_billing.types.SkuType;
 import com.appcoins.sdk.billing.Inventory;
 import com.appcoins.sdk.billing.Purchase;
 import com.appcoins.sdk.billing.PurchasesResult;
@@ -49,7 +52,7 @@ public class IabHelper implements ServiceConnection {
     private int mRequestCode;
     private OnIabPurchaseFinishedListener mPurchaseListener;
     private String mPurchasingItemType;
-    private WalletBillingService mService;
+    public WalletBillingService mService;
     private OnIabSetupFinishedListener listener;
     private boolean mSubscriptionsSupported;
     private boolean mSubscriptionUpdateSupported;
@@ -78,12 +81,12 @@ public class IabHelper implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        Log.d("Message", "Disconnected");
+        mSetupDone = false;
     }
 
     @Override
     public void onBindingDied(ComponentName name) {
-        Log.d("Message", "Connection Died");
+        mSetupDone = false;
     }
 
     private void checkBillingVersionV3INAPP(WalletBillingService service, String packageName, int apiVersion, String type) throws RemoteException {
@@ -148,7 +151,7 @@ public class IabHelper implements ServiceConnection {
     public PurchasesResult queryPurchases(Inventory inv, String skuType) {
 
         PurchasesResult purchasesResult = new PurchasesResult();
-
+        purchasesResult.setPurchases(new ArrayList<Purchase>());
         // Query purchases
         logDebug("Querying owned items, item type: " + skuType);
         logDebug("Package name: " + mContext.getPackageName());
@@ -194,9 +197,9 @@ public class IabHelper implements ServiceConnection {
                 String sku = ownedSkus.get(i);
                 String id = idsList.get(i);
                 if (Security.verifyPurchase(mSignatureBase64, purchaseData, signature)) {
-                    logDebug("Sku is owned: " + sku);
-                    Log.d("purchaseData", purchaseData);
-                    Log.d("siganture", signature);
+                    //logDebug("Sku is owned: " + sku);
+                    //Log.d("purchaseData", purchaseData);
+                    //Log.d("siganture", signature);
                     Purchase purchase = null;
                     try {
                         purchase = new Purchase(id, skuType, purchaseData, signature);
@@ -210,8 +213,10 @@ public class IabHelper implements ServiceConnection {
                     }
 
                     // Record ownership and token
+                    purchasesResult.getPurchases().add(purchase);
                     inv.addPurchase(purchase);
                     Log.d("Size map inserir", inv.getAllPurchases().size() + "");
+                    Log.d("Size list inserir", purchasesResult.getPurchases().size() + "");
                 } else {
                     logWarn("Purchase signature verification **FAILED**. Not adding item.");
                     logDebug("   Purchase data: " + purchaseData);
@@ -225,9 +230,7 @@ public class IabHelper implements ServiceConnection {
         } while (!TextUtils.isEmpty(continueToken));
 
         purchasesResult.setResponseCode(verificationFailed ? Utils.IABHELPER_VERIFICATION_FAILED : Utils.BILLING_RESPONSE_RESULT_OK);
-
         purchasesResult.setPurchases(inv.getAllPurchases());
-
         return purchasesResult;
     }
 
@@ -391,6 +394,7 @@ public class IabHelper implements ServiceConnection {
             for (String thisResponse : responseList) {
                 SkuDetails d = null;
                 try {
+                    Log.d("VALUE SKU BUNDLE",thisResponse);
                     d = new SkuDetails(itemType, thisResponse);
                 } catch (Exception e) {
                     throw new JSONException(e.getCause());
@@ -407,7 +411,7 @@ public class IabHelper implements ServiceConnection {
         Object o = b.get(Utils.RESPONSE_CODE);
         if (o == null) {
             Log.d("Message", "Bundle with null response code, assuming OK (known issue)");
-            return Utils.BILLING_RESPONSE_RESULT_OK;
+                return Utils.BILLING_RESPONSE_RESULT_OK;
         } else if (o instanceof Integer) {
             return ((Integer) o).intValue();
         } else if (o instanceof Long) {
@@ -442,7 +446,7 @@ public class IabHelper implements ServiceConnection {
         mService = null;
     }
 
-    public void launchPurchaseFlow(Activity act, String sku, String
+    public void launchBillingFlow(Activity act, String sku, String
             itemType, List<String> oldSkus,
                                    int requestCode, OnIabPurchaseFinishedListener listener, String extraData)
             throws IabAsyncInProgressException {
@@ -516,6 +520,59 @@ public class IabHelper implements ServiceConnection {
         }
     }
 
+    public void consumeAsync(final String  purchaseToken, final ConsumeResponseListener listener) throws IabAsyncInProgressException {
+        final Handler handler = new Handler();
+        flagStartAsync("consume");
+        (new Thread(new Runnable() {
+            public void run() {
+                 IabResult res;
+                    try{
+                        consume(purchaseToken);
+                        res = new IabResult(Utils.BILLING_RESPONSE_RESULT_OK,
+                                "Successful consume of token " + purchaseToken);
+                    } catch (IabException ex) {
+                        res = ex.getResult();
+                    }
+
+                    final int response = res.getResponse();
+
+                flagEndAsync();
+                if (!mDisposed && listener != null) {
+                    handler.post(new Runnable() {
+                        public void run() {
+                            listener.onConsumeResponse(response,purchaseToken);
+                        }
+                    });
+                }
+            }
+        })).start();
+    }
+
+    void consume(String purchaseToken) throws IabException {
+        checkNotDisposed();
+        checkSetupDone("consume");
+
+        try {
+
+            if (purchaseToken == null || purchaseToken.equals("")) {
+                logError("Can't consume. No token.");
+                throw new IabException(Utils.IABHELPER_MISSING_TOKEN,
+                        "PurchaseInfo is missing token for sku");
+            }
+
+            logDebug("Consuming  token: " + purchaseToken);
+            int response = mService.consumePurchase(3, mContext.getPackageName(), purchaseToken);
+            if (response == Utils.BILLING_RESPONSE_RESULT_OK) {
+                logDebug("Successfully consumed token: " + purchaseToken);
+            } else {
+                logDebug("Error consuming consuming token " + purchaseToken + ". " + Utils.getResponseDesc(response));
+                throw new IabException(response, "Error consuming token " + purchaseToken);
+            }
+        } catch (RemoteException e) {
+            throw new IabException(Utils.IABHELPER_REMOTE_EXCEPTION,
+                    "Remote exception while consuming.", e);
+        }
+    }
 
     private void checkNotDisposed() {
         if (Utils.mDisposed) {

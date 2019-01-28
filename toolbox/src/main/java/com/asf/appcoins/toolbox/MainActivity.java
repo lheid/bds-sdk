@@ -12,6 +12,7 @@ import com.appcoins.sdk.android_appcoins_billing.helpers.CatapultBillingAppcoins
 
 import com.appcoins.sdk.android_appcoins_billing.exception.IabException;
 
+import com.appcoins.sdk.android_appcoins_billing.listeners.ConsumeResponseListener;
 import com.appcoins.sdk.android_appcoins_billing.types.SkuType;
 
 import com.appcoins.sdk.billing.Purchase;
@@ -79,10 +80,23 @@ public class MainActivity extends Activity {
         PurchasesResult pr = cab.queryPurchases(SkuType.INAPP);
         Log.d("Purchase result", "-------------------------");
         Log.d("Purchase res resp code", pr.getResponseCode() + "");
+
+
         for(Purchase p : pr.getPurchases()){
             Log.d("Purchase result token: ", p.getToken());
             Log.d("Purchase result sku: ", p.getSku());
+            int result = p.getPurchaseState();
+            Log.d("Purchase State: ", result+"");
+
         }
+        cab.consumeAsync(pr.getPurchases().get(0).getToken(), new ConsumeResponseListener() {
+            @Override
+            public void onConsumeResponse(int responseCode, String purchaseToken) {
+                Log.d("Resultado :" ,responseCode+"");
+                Log.d("Token :" ,purchaseToken);
+            }
+        });
+
         Log.d("Purchase result", "-------------------------");
     }
 
@@ -95,7 +109,6 @@ public class MainActivity extends Activity {
     ArrayList <String> al = new ArrayList<String>();
 
     al.add("gas");
-
 
     skuDetailsParam.setMoreItemSkus(al);
     Log.d("INICIAR SKU ASYNC","Iniciar sku async");
@@ -116,7 +129,7 @@ public class MainActivity extends Activity {
           String payload =
                   PayloadHelper.buildIntentPayload(Application.developerAddress,
                           null);
-          cab.launchPurchaseFlow(MainActivity.this, skuDetailsList.get(0).getSku(), SkuType.INAPP, al, 10001, (OnIabPurchaseFinishedListener) (result, info) -> {
+          cab.launchBillingFlow(MainActivity.this, skuDetailsList.get(0).getSku(), SkuType.INAPP, al, 10001, (OnIabPurchaseFinishedListener) (result, info) -> {
             Log.d("aquiiiiiiiiiiiiiiii: ",".....................");
             Log.d("result: ",result.getMessage());
             Log.d("Purchase: ",info.getSku());

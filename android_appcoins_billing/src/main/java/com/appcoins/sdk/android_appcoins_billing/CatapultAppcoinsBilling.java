@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.appcoins.sdk.android_appcoins_billing.exception.IabAsyncInProgressException;
 import com.appcoins.sdk.android_appcoins_billing.helpers.IabHelper;
+import com.appcoins.sdk.android_appcoins_billing.listeners.ConsumeResponseListener;
 import com.appcoins.sdk.android_appcoins_billing.listeners.OnIabPurchaseFinishedListener;
 import com.appcoins.sdk.android_appcoins_billing.listeners.OnIabSetupFinishedListener;
 import com.appcoins.sdk.android_appcoins_billing.listeners.OnSkuDetailsResponseListener;
@@ -43,16 +44,23 @@ public class CatapultAppcoinsBilling implements AppcoinsBilling {
         }
     }
 
-
-    public void launchPurchaseFlow(Object act, String sku, String itemType, List<String> oldSkus, int requestCode, ResponseListener listener, String extraData) {
+    @Override
+    public void launchBillingFlow(Object act, String sku, String itemType, List<String> oldSkus, int requestCode, ResponseListener listener, String extraData) {
         try {
-            iabHelper.launchPurchaseFlow((Activity) act,sku,itemType,oldSkus,requestCode,(OnIabPurchaseFinishedListener)listener,extraData);
+            iabHelper.launchBillingFlow((Activity) act,sku,itemType,oldSkus,requestCode,(OnIabPurchaseFinishedListener)listener,extraData);
         } catch (IabAsyncInProgressException e) {
-
 
         }
     }
 
+    @Override
+    public void consumeAsync(String purchaseToken, ResponseListener listener) {
+        try {
+            iabHelper.consumeAsync(purchaseToken, (ConsumeResponseListener) listener);
+        } catch (IabAsyncInProgressException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void startService(final OnIabSetupFinishedListener listener){
         iabHelper.startService(listener);

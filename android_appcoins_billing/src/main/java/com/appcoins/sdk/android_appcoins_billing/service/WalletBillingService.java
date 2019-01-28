@@ -43,7 +43,7 @@ public class WalletBillingService implements AppcoinsBilling {
 
     @Override
     public int consumePurchase(int apiVersion, String packageName, String purchaseToken) throws RemoteException {
-        return 0;
+        return service.consumePurchase(apiVersion,packageName,purchaseToken);
     }
 
     @Override

@@ -8,6 +8,8 @@ public interface AppcoinsBilling {
 
     void querySkuDetailsAsync(SkuDetailsParam skuDetailsParam , ResponseListener onSkuDetailsResponseListener);
 
-    void launchPurchaseFlow(Object act,String sku, String itemType, List<String> oldSkus, int requestCode, ResponseListener listener, String extraData);
+    void launchBillingFlow(Object act,String sku, String itemType, List<String> oldSkus, int requestCode, ResponseListener listener, String extraData);
+
+    void consumeAsync(String purchaseToken,ResponseListener listener);
 }
 
