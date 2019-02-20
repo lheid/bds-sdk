@@ -17,9 +17,25 @@ public class AppCoinsClient implements AppCoinsConnection {
 
   @Override
   public void getCampaign(QueryParams queryParams, ClientResponseHandler clientResponseHandler) {
-    GetCampaignOperation getCampaignOperation = new GetCampaignOperation();
 
-    AppCoinsHTTPClient appcoinsHTTPClient = new AppCoinsHTTPClient(serviceUrl, interceptor,
+    AppCoinsHTTPClient appcoinsHTTPClient =
+        createAppcoinsHttpClient(clientResponseHandler, queryParams);
+
+    Thread operation = new Thread(appcoinsHTTPClient);
+    operation.start();
+  }
+
+  @Override public void checkConnectivity(ClientResponseHandler clientResponseHandler) {
+
+    AppCoinsHTTPClient appcoinsHTTPClient = createAppCoinsPingClient(clientResponseHandler);
+    Thread operation = new Thread(appcoinsHTTPClient);
+    operation.start();
+  }
+
+  public AppCoinsHTTPClient createAppcoinsHttpClient(ClientResponseHandler clientResponseHandler,
+      QueryParams queryParams) {
+    GetCampaignOperation getCampaignOperation = new GetCampaignOperation();
+    return new AppCoinsHTTPClient(serviceUrl, interceptor,
         getCampaignOperation.mapParams(packageName, Integer.toString(versionCode), queryParams),
         response -> {
 
@@ -27,21 +43,15 @@ public class AppCoinsClient implements AppCoinsConnection {
               getCampaignOperation.mapResponse((String) response);
           clientResponseHandler.clientResponseHandler(appcoinsClientResponse);
         });
-
-    Thread operation = new Thread(appcoinsHTTPClient);
-    operation.start();
   }
 
-  @Override public void checkConnectivity(ClientResponseHandler clientResponseHandler) {
+  public AppCoinsHTTPClient createAppCoinsPingClient(ClientResponseHandler clientResponseHandler) {
     String pathUrl = GetCampaignOperation.getRequestCampaignPath();
-    AppCoinsHTTPClient appcoinsHTTPClient =
-        new AppCoinsPingClient(serviceUrl + pathUrl, interceptor, response -> {
+    return new AppCoinsPingClient(serviceUrl + pathUrl, interceptor, response -> {
 
-          AppCoinsClientResponse appcoinsClientResponse =
-              new AppCoinsClientResponsePing((boolean) response);
-          clientResponseHandler.clientResponseHandler(appcoinsClientResponse);
-        });
-    Thread operation = new Thread(appcoinsHTTPClient);
-    operation.start();
+      AppCoinsClientResponse appcoinsClientResponse =
+          new AppCoinsClientResponsePing((boolean) response);
+      clientResponseHandler.clientResponseHandler(appcoinsClientResponse);
+    });
   }
 }

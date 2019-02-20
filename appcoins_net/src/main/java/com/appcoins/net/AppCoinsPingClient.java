@@ -17,7 +17,7 @@ public class AppCoinsPingClient extends AppCoinsHTTPClient implements Runnable {
     getResponseHandler.getResponseHandler(result);
   }
 
-  private boolean pingServers() {
+  public boolean pingServers() {
 
     boolean result = false;
     URL url = null;
