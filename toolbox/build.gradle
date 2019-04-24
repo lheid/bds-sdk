@@ -40,6 +40,5 @@ dependencies {
   testImplementation lib.junit
 
   api project(':android-appcoins-billing')
-  api project(':appcoins-contract-proxy')
   api project(':appcoins-ads')
 }

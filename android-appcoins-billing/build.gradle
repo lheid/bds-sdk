@@ -17,57 +17,47 @@ android {
     }
 
     signingConfigs {
-        release {
+      release {
             storeFile = file(project.APPCOINS_WALLET_STORE_FILE)
             storePassword = project.APPCOINS_WALLET_STORE_PASSWORD
             keyAlias = project.APPCOINS_WALLET_KEY_ALIAS
             keyPassword = project.APPCOINS_WALLET_KEY_PASSWORD
-        }
+      }
     }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+  buildTypes {
+    debug {
+      minifyEnabled false
+      buildConfigField "String", "IAB_BIND_ACTION",
+          "\"" + project.APPCOINS_DEV_IAB_BIND_ACTION + "\""
+      buildConfigField "String", "IAB_BIND_PACKAGE",
+          "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
+      buildConfigField "String", "IAB_WALLET_ADDR",
+          "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
+      buildConfigField "String", "IAB_KEY",
+          "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
+      manifestPlaceholders.iabPermission = "${project.APPCOINS_IAB_PERMISSION}"
     }
 
-    productFlavors {
-        appcoinsiab {
-            dimension "iab"
-            buildConfigField "String", "IAB_UPDATE_ACTION",
-                    "\"" + project.APPCOINS_IAB_UPDATE_ACTION + "\""
-            libraryVariants.all { variant ->
-                if (variant.buildType.getName().equalsIgnoreCase("debug")) {
-                    buildConfigField "String", "IAB_BIND_ACTION",
-                            "\"" + project.APPCOINS_DEV_IAB_BIND_ACTION + "\""
-                    buildConfigField "String", "IAB_BIND_PACKAGE",
-                            "\"" + project.APPCOINS_DEV_IAB_BIND_PACKAGE + "\""
-                    buildConfigField "String", "IAB_WALLET_ADDR",
-                            "\"" + project.APPCOINS_DEV_IAB_WALLET_ADDR + "\""
-                    buildConfigField "String", "IAB_KEY",
-                            "\"" + project.APPCOINS_DEV_IAB_KEY + "\""
-                    variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
-                } else {
-                    buildConfigField "String", "IAB_KEY",
-                            "\"" + project.APPCOINS_IAB_KEY + "\""
-                    buildConfigField "String", "IAB_BIND_ACTION",
-                            "\"" + project.APPCOINS_IAB_BIND_ACTION + "\""
-                    buildConfigField "String", "IAB_BIND_PACKAGE",
-                            "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
-                    buildConfigField "String", "IAB_WALLET_ADDR",
-                            "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
-                    variant.getMergedFlavor().manifestPlaceholders = [iabPermission: project.APPCOINS_IAB_PERMISSION]
-                }
-            }
-        }
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+      buildConfigField "String", "IAB_KEY",
+          "\"" + project.APPCOINS_IAB_KEY + "\""
+      buildConfigField "String", "IAB_BIND_ACTION",
+          "\"" + project.APPCOINS_IAB_BIND_ACTION + "\""
+      buildConfigField "String", "IAB_BIND_PACKAGE",
+          "\"" + project.APPCOINS_IAB_BIND_PACKAGE + "\""
+      buildConfigField "String", "IAB_WALLET_ADDR",
+          "\"" + project.APPCOINS_IAB_WALLET_ADDR + "\""
+      manifestPlaceholders.iabPermission = "${project.APPCOINS_IAB_PERMISSION}"
     }
+  }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-
     implementation 'com.android.support:appcompat-v7:28.0.0'
     testImplementation 'junit:junit:4.12'
     implementation 'com.google.code.gson:gson:2.8.5'
