@@ -11,6 +11,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import com.appcoins.sdk.android.billing.BuildConfig;
 import com.appcoins.sdk.android.billing.R;
+import com.appcoins.sdk.billing.Security;
 import java.lang.reflect.Field;
 
 public class WalletUtils {
@@ -25,7 +26,7 @@ public class WalletUtils {
 
   public static boolean hasWalletInstalled() {
     PackageManager packageManager = context.getPackageManager();
-
+    SecurityUtils.checkAppSignature(context,walletPackageName);
     try {
       packageManager.getPackageInfo(walletPackageName, 0);
       return true;

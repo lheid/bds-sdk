@@ -18,13 +18,11 @@ public class SecurityUtils {
   public static final int INVALID_APP_SIGNATURE = 1;
   public static final String APTOIDE_STORE_APP_ID = "cm.aptoide.pt";
   public static final String PLAY_STORE_APP_ID = "com.android.vending";
-  public static final String AMAZON_STORE_APP_ID = "com.amazon.mShop.android";
-  public static final String XIAOMI_STORE_APP_ID = "com.xiaomi.market";
   private static final String TAG = SecurityUtils.class.getName();
   // point a string obfuscator tool - like DexGuard has - to here
-  private static final String APP_SIGNATURE = "1BI0Pl1n8Go3MfT0TSKIddaGZbQ=";
+  private static final String APP_SIGNATURE = "UeCPXCfLgdNf8NJH6fiO2mdqpR4=";
 
-  public static int checkAppSignature(Context context) {
+  public static int checkAppSignature(Context context, String packageName) {
     try {
 
       //check app signature for API 28 only because the GET_SIGNATURES method
@@ -32,24 +30,41 @@ public class SecurityUtils {
       if (Build.VERSION.SDK_INT >= 28) {
 
         final PackageInfo packageInfo = context.getPackageManager()
-            .getPackageInfo(context.getPackageName(), PackageManager.GET_SIGNING_CERTIFICATES);
+            .getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES);
 
         final Signature[] signatures = packageInfo.signingInfo.getApkContentsSigners();
 
         final MessageDigest md = MessageDigest.getInstance("SHA");
         for (Signature signature : signatures) {
           md.update(signature.toByteArray());
-          final String currentSignature = Base64.encodeToString(md.digest(), Base64.DEFAULT);
+          final String currentSignature = Base64.encodeToString(md.digest(), Base64.NO_WRAP);
 
           Log.d(TAG,
               String.format("Include this string as a value for SIGNATURE: %s", currentSignature));
 
           //compare signatures
-
-          if (TextUtils.equals(APP_SIGNATURE, currentSignature)) {
-            Log.d(TAG, "VALID_APP_SIGNATURE");
+          if (compareSignatures(APP_SIGNATURE, currentSignature)) {
             return VALID_APP_SIGNATURE;
           }
+        }
+      }
+
+      //check app signature for API's under 28
+      PackageInfo packageInfo = context.getPackageManager()
+          .getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+
+      for (Signature signature : packageInfo.signatures) {
+
+        MessageDigest md = MessageDigest.getInstance("SHA");
+        md.update(signature.toByteArray());
+        final String currentSignature = Base64.encodeToString(md.digest(), Base64.NO_WRAP);
+
+        Log.d(TAG,
+            String.format("Include this string as a value for SIGNATURE: %s", currentSignature));
+
+        //compare signatures
+        if (compareSignatures(APP_SIGNATURE, currentSignature)) {
+          return VALID_APP_SIGNATURE;
         }
       }
     } catch (PackageManager.NameNotFoundException | NoSuchAlgorithmException e) {
@@ -58,4 +73,13 @@ public class SecurityUtils {
     Log.d(TAG, "INVALID_APP_SIGNATURE");
     return INVALID_APP_SIGNATURE;
   }
+
+  public static boolean compareSignatures(String sig1, String sig2) {
+    if (TextUtils.equals(sig1, sig2)) {
+      Log.d(TAG, "VALID_APP_SIGNATURE");
+      return true;
+    }
+    return false;
+  }
 }
+
