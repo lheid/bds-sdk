@@ -16,8 +16,6 @@ import java.lang.ref.WeakReference;
 
 public class WalletUtils {
 
-  public static String walletPackageName = BuildConfig.BDS_WALLET_PACKAGE_NAME;
-
   public static WeakReference<Activity> context;
 
   public static void setContext(Activity cont) {
@@ -27,10 +25,13 @@ public class WalletUtils {
   public static boolean hasWalletInstalled() {
     PackageManager packageManager = context.get()
         .getPackageManager();
-    SecurityUtils.checkAppSignature(context.get(),walletPackageName);
     try {
       packageManager.getPackageInfo(BuildConfig.BDS_WALLET_PACKAGE_NAME, 0);
+      if((SecurityUtils.checkAppSignature(context.get(),BuildConfig.BDS_WALLET_PACKAGE_NAME)) == 0){
       return true;
+      } else {
+        return false;
+      }
     } catch (PackageManager.NameNotFoundException e) {
       return false;
     }
