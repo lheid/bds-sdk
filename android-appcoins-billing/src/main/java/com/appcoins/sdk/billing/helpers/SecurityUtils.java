@@ -17,7 +17,6 @@ public class SecurityUtils {
   public static final int VALID_APP_SIGNATURE = 0;
   public static final int INVALID_APP_SIGNATURE = 1;
   private static final String TAG = SecurityUtils.class.getName();
-  // point a string obfuscator tool - like DexGuard has - to here
   private static final String APP_SIGNATURE = "UeCPXCfLgdNf8NJH6fiO2mdqpR4=";
 
   public static int checkAppSignature(Context context, String packageName) {
@@ -27,7 +26,7 @@ public class SecurityUtils {
       final String currentSignature = Base64.encodeToString(md.digest(), Base64.NO_WRAP);
 
       //check app signature for API 28 only because the GET_SIGNATURES method
-      // is deprecated fo this version and must be replaced by GET_SIGNING_CERTIFICATES
+      // is deprecated for this version and must be replaced by GET_SIGNING_CERTIFICATES
       if (Build.VERSION.SDK_INT >= 28) {
 
         final PackageInfo packageInfo = context.getPackageManager()
