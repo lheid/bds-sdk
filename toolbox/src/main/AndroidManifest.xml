@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.asf.appcoins.toolbox">
+
   <uses-permission android:name="android.permission.INTERNET"/>
   <application
       android:name=".App"
@@ -17,6 +18,32 @@
       </intent-filter>
     </activity>
     <activity android:name=".EmptyActivity"/>
+    <activity
+        android:name="com.asf.appcoins.toolbox.IntentActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+
+        <data android:scheme="market"/>
+        <data android:scheme="web"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+
+        <data
+            android:host="play.google.com"
+            android:scheme="https"/>
+        <data
+            android:host="play.google.com"
+            android:scheme="http"/>
+      </intent-filter>
+    </activity>
   </application>
+
 
 </manifest>

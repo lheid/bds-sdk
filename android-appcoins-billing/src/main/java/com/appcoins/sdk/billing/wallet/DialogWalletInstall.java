@@ -51,6 +51,9 @@ public class DialogWalletInstall extends Dialog {
       + BuildConfig.BDS_WALLET_PACKAGE_NAME
       + "&utm_source=appcoinssdk&app_source="
       + getContext().getPackageName();
+
+  private final String URL_GOOGLE_PLAY = "";
+
   private static Context mContext;
 
   public static DialogWalletInstall with(Context context) {
@@ -173,16 +176,16 @@ public class DialogWalletInstall extends Dialog {
   }
 
   private void redirectToStore() {
-    //https://developer.android.com/distribute/marketing-tools/linking-to-google-play
-    getContext().startActivity(buildStoreViewIntent(URL_APTOIDE));
+    getContext().startActivity(buildStoreViewIntent(URL_GOOGLE_PLAY));
   }
 
   private Intent buildStoreViewIntent(String action) {
 
     final Intent appStoreIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(action));
-    if (WalletUtils.hasAptoideInstalled()) {
-      appStoreIntent.setPackage(BuildConfig.APTOIDE_PACKAGE_NAME);
-    }
+
+   // if (WalletUtils.hasAptoideInstalled()) {
+     // appStoreIntent.setPackage(BuildConfig.APTOIDE_PACKAGE_NAME);
+    //}
     return appStoreIntent;
   }
 

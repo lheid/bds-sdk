@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -89,12 +90,29 @@ public class AppcoinsBillingStubHelper implements AppcoinsBilling {
     SkuDetailsResult skuDetailsResult = AndroidBillingMapper.mapSkuDetailsFromWS(type, response);
     ArrayList<String> list = new ArrayList<>();
     for (SkuDetails skuDetails : skuDetailsResult.getSkuDetailsList()) {
-      list.add(AndroidBillingMapper.mapGetSkuDetails(skuDetails));
+      list.add(map(skuDetails));
     }
     return list;
   }
 
-  
+  private String map(SkuDetails skuDetails) {
+    return "{\"productId\":\""
+        + skuDetails.getSku()
+        + "\",\"type\" : \""
+        + skuDetails.getType()
+        + "\",\"price\" : "
+        + skuDetails.getPrice()
+        + ",\"price_currency_code\": \""
+        + skuDetails.getPriceCurrencyCode()
+        + "\",\"price_amount_micros\": "
+        + skuDetails.getPriceAmountMicros()
+        + ",\"title\" : \""
+        + skuDetails.getTitle()
+        + "\",\"description\" : \""
+        + skuDetails.getDescription()
+        + "\"}";
+  }
+
   @Override public Bundle getBuyIntent(int apiVersion, String packageName, String sku, String type,
       String developerPayload) {
     if (WalletUtils.hasWalletInstalled()) {
@@ -113,6 +131,16 @@ public class AppcoinsBillingStubHelper implements AppcoinsBilling {
         return response;
       }
     } else {
+
+     String url =  "https://play.google.com/store/apps/details?id=c"
+          + "om.duckduckgo.mobile.android&hl=en_US&refe"
+          + "rrer=utm_source%3Dgoogle%26utm_medium%3Dorg"
+          + "anic%26utm_term%3Dduck+duck+go&pcampaignid="
+          + "APPU_1_N9ZwXc3eG-GKlwTj95zYDw#Intent;scheme"
+          + "=https;package=com.android.vending;end";
+
+
+      //Intent intent = new Intent(Intent.ACTION_SCREEN_ON, Uri.parse(url));
       Intent intent = new Intent(WalletUtils.context.get(), InstallDialogActivity.class);
       PendingIntent pendingIntent = PendingIntent.getActivity(WalletUtils.context.get(), 0, intent,
           PendingIntent.FLAG_UPDATE_CURRENT);
