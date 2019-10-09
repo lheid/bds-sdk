@@ -72,7 +72,8 @@ public class MainActivity extends Activity {
     Activity act = this;
     Thread t = new Thread(new Runnable() {
       @Override public void run() {
-        int launchBillingFlowResponse = cab.launchBillingFlow(act, billingFlowParams);
+        int launchBillingFlowResponse = cab.launchBillingFlow(act, billingFlowParams,
+            getApplicationContext().getPackageManager());
         Log.d(TAG, "BillingFlowResponse: " + launchBillingFlowResponse);
       }
     });

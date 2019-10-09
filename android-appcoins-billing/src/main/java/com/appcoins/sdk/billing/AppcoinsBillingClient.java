@@ -1,11 +1,7 @@
 package com.appcoins.sdk.billing;
 
 import android.app.Activity;
-import android.os.Bundle;
-import android.util.Log;
-import com.appcoins.sdk.billing.helpers.Utils;
-import com.appcoins.sdk.billing.helpers.WalletUtils;
-import java.util.ArrayList;
+import android.content.pm.PackageManager;
 
 public interface AppcoinsBillingClient {
   PurchasesResult queryPurchases(String skuType);
@@ -15,7 +11,8 @@ public interface AppcoinsBillingClient {
 
   void consumeAsync(String token, ConsumeResponseListener consumeResponseListener);
 
-  int launchBillingFlow(Activity activity, BillingFlowParams billingFlowParams);
+  int launchBillingFlow(Activity activity, BillingFlowParams billingFlowParams,
+      PackageManager packageManager);
 
   void startConnection(AppCoinsBillingStateListener listener);
 

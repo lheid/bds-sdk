@@ -1,6 +1,5 @@
 package com.appcoins.sdk.billing.helpers;
 
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -24,9 +23,8 @@ import java.util.List;
 public class AppcoinsBillingStubHelper implements AppcoinsBilling {
   private static final String TAG = AppcoinsBillingStubHelper.class.getSimpleName();
   private static final String IS_BINDED_KEY = "IS_BIND";
-
-  private final Object lockThread;
   private static AppcoinsBilling serviceAppcoinsBilling;
+  private final Object lockThread;
   private boolean isServiceBound = false;
   private boolean isMainThread;
 
@@ -89,48 +87,9 @@ public class AppcoinsBillingStubHelper implements AppcoinsBilling {
     return responseWs;
   }
 
-  private ArrayList<String> buildResponse(String response, String type) {
-    SkuDetailsResult skuDetailsResult = AndroidBillingMapper.mapSkuDetailsFromWS(type, response);
-    ArrayList<String> list = new ArrayList<>();
-    for (SkuDetails skuDetails : skuDetailsResult.getSkuDetailsList()) {
-      list.add(map(skuDetails));
-    }
-    return list;
-  }
-
-  private String map(SkuDetails skuDetails) {
-    return "{\"productId\":\""
-        + skuDetails.getSku()
-        + "\",\"type\" : \""
-        + skuDetails.getType()
-        + "\",\"price\" : \""
-        + skuDetails.getPrice()
-        + "\",\"price_currency_code\": \""
-        + skuDetails.getPriceCurrencyCode()
-        + "\",\"price_amount_micros\": "
-        + skuDetails.getPriceAmountMicros()
-        + ",\"appc_price\" : \""
-        + skuDetails.getAppcPrice()
-        + "\",\"appc_price_currency_code\": \""
-        + skuDetails.getAppcPriceCurrencyCode()
-        + "\",\"appc_price_amount_micros\": "
-        + skuDetails.getAppcPriceAmountMicros()
-        + ",\"fiat_price\" : \""
-        + skuDetails.getFiatPrice()
-        + "\",\"fiat_price_currency_code\": \""
-        + skuDetails.getFiatPriceCurrencyCode()
-        + "\",\"fiat_price_amount_micros\": "
-        + skuDetails.getFiatPriceAmountMicros()
-        + ",\"title\" : \""
-        + skuDetails.getTitle()
-        + "\",\"description\" : \""
-        + skuDetails.getDescription()
-        + "\"}";
-  }
-
   @Override public Bundle getBuyIntent(int apiVersion, String packageName, String sku, String type,
       String developerPayload) {
-     if (WalletUtils.hasWalletInstalled()) {
+    if (WalletUtils.hasWalletInstalled()) {
       try {
         Bundle response = walletInstalledBehaviour();
         if (response.containsKey(IS_BINDED_KEY)) {
@@ -147,10 +106,8 @@ public class AppcoinsBillingStubHelper implements AppcoinsBilling {
       }
     } else {
       Intent intent = new Intent(WalletUtils.context.get(), InstallDialogActivity.class);
-      PendingIntent pendingIntent = PendingIntent.getActivity(WalletUtils.context.get(), 0, intent,
-          PendingIntent.FLAG_UPDATE_CURRENT);
       Bundle response = new Bundle();
-      response.putParcelable("BUY_INTENT", pendingIntent);
+      response.putParcelable("BUY_INTENT", intent);
 
       response.putInt(Utils.RESPONSE_CODE, ResponseCode.OK.getValue());
       return response;
@@ -203,6 +160,45 @@ public class AppcoinsBillingStubHelper implements AppcoinsBilling {
     } else {
       return ResponseCode.OK.getValue();
     }
+  }
+
+  private ArrayList<String> buildResponse(String response, String type) {
+    SkuDetailsResult skuDetailsResult = AndroidBillingMapper.mapSkuDetailsFromWS(type, response);
+    ArrayList<String> list = new ArrayList<>();
+    for (SkuDetails skuDetails : skuDetailsResult.getSkuDetailsList()) {
+      list.add(map(skuDetails));
+    }
+    return list;
+  }
+
+  private String map(SkuDetails skuDetails) {
+    return "{\"productId\":\""
+        + skuDetails.getSku()
+        + "\",\"type\" : \""
+        + skuDetails.getType()
+        + "\",\"price\" : \""
+        + skuDetails.getPrice()
+        + "\",\"price_currency_code\": \""
+        + skuDetails.getPriceCurrencyCode()
+        + "\",\"price_amount_micros\": "
+        + skuDetails.getPriceAmountMicros()
+        + ",\"appc_price\" : \""
+        + skuDetails.getAppcPrice()
+        + "\",\"appc_price_currency_code\": \""
+        + skuDetails.getAppcPriceCurrencyCode()
+        + "\",\"appc_price_amount_micros\": "
+        + skuDetails.getAppcPriceAmountMicros()
+        + ",\"fiat_price\" : \""
+        + skuDetails.getFiatPrice()
+        + "\",\"fiat_price_currency_code\": \""
+        + skuDetails.getFiatPriceCurrencyCode()
+        + "\",\"fiat_price_amount_micros\": "
+        + skuDetails.getFiatPriceAmountMicros()
+        + ",\"title\" : \""
+        + skuDetails.getTitle()
+        + "\",\"description\" : \""
+        + skuDetails.getDescription()
+        + "\"}";
   }
 
   private synchronized Bundle walletInstalledBehaviour() throws InterruptedException {
