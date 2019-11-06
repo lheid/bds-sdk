@@ -16,7 +16,7 @@ public class WalletUtils {
   public static final int UNINSTALLED_APTOIDE_VERSION_CODE = 0;
 
   public static Context context;
-  public static Activity activity;
+
   public static String billingPackageName;
 
   public static void setContext(Context context) {
