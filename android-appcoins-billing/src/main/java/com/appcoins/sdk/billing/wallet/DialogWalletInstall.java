@@ -19,6 +19,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
@@ -87,7 +88,8 @@ public class DialogWalletInstall extends Dialog {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
+    Log.d("InstallDialogActivity",
+        "com.appcoins.sdk.billing.helpers.InstallDialogActivity started");
     String packageName = appContext.getPackageName();
     Window window = getWindow();
 
