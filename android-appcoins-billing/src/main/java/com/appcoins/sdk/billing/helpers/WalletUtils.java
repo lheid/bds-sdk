@@ -19,19 +19,18 @@ public class WalletUtils {
 
   public static boolean hasWalletInstalled() {
     if (billingPackageName == null) {
-      getPackageToBind();
+      bindToPackage();
     }
     return billingPackageName != null;
   }
 
-  private static void getPackageToBind() {
-    List<String> intentServicesResponse = new ArrayList<>();
+  private static void bindToPackage() {
     Intent serviceIntent = new Intent(BuildConfig.IAB_BIND_ACTION);
-
     List<ResolveInfo> intentServices = context.getPackageManager()
         .queryIntentServices(serviceIntent, 0);
 
     if (intentServices != null && intentServices.size() > 0) {
+      List<String> intentServicesResponse = new ArrayList<>();
       for (ResolveInfo intentService : intentServices) {
         intentServicesResponse.add(intentService.serviceInfo.packageName);
       }
@@ -60,19 +59,18 @@ public class WalletUtils {
 
   static int getAptoideVersion() {
 
-    final PackageInfo pInfo;
+    final PackageInfo packageInfo;
     int versionCode = UNINSTALLED_APTOIDE_VERSION_CODE;
 
     try {
-      pInfo = context.getPackageManager()
+      packageInfo = context.getPackageManager()
           .getPackageInfo(BuildConfig.APTOIDE_PACKAGE_NAME, 0);
 
       //VersionCode is deprecated for api 28
       if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        versionCode = (int) pInfo.getLongVersionCode();
+        versionCode = (int) packageInfo.getLongVersionCode();
       } else {
-        //noinspection deprecation
-        versionCode = pInfo.versionCode;
+        versionCode = packageInfo.versionCode;
       }
     } catch (PackageManager.NameNotFoundException e) {
       e.printStackTrace();
@@ -90,7 +88,7 @@ public class WalletUtils {
 
   public static String getBillingServicePackageName() {
     if (billingPackageName == null) {
-      getPackageToBind();
+      bindToPackage();
     }
     return billingPackageName;
   }

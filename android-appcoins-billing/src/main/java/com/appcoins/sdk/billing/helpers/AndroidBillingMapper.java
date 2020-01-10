@@ -6,11 +6,9 @@ import android.util.Log;
 import com.appcoins.sdk.billing.LaunchBillingFlowResult;
 import com.appcoins.sdk.billing.Purchase;
 import com.appcoins.sdk.billing.PurchasesResult;
-import com.appcoins.sdk.billing.ResponseCode;
 import com.appcoins.sdk.billing.SkuDetails;
 import com.appcoins.sdk.billing.SkuDetailsResult;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,9 +16,16 @@ import org.json.JSONObject;
 
 public class AndroidBillingMapper {
   private static final String APPC = "APPC";
+  private static final String TOKEN_KEY = "token";
+  private static final String AUTO_RENEW_KEY = "autoRenewing";
+  private static final String DEV_PAYLOAD_KEY = "developerPayload";
+  private static final String DETAILS_LIST_KEY = "DETAILS_LIST";
+  private static final String RESPONSE_CODE_KEY = "RESPONSE_CODE";
+  private static final String FIAT_KEY = "fiat";
+  private static final String BASE_KEY = "base";
 
   public static PurchasesResult mapPurchases(Bundle bundle, String skuType) {
-    int responseCode = bundle.getInt("RESPONSE_CODE");
+    int responseCode = bundle.getInt(RESPONSE_CODE_KEY);
     ArrayList<String> purchaseDataList =
         bundle.getStringArrayList(Utils.RESPONSE_INAPP_PURCHASE_DATA_LIST);
     ArrayList<String> signatureList =
@@ -28,50 +33,27 @@ public class AndroidBillingMapper {
     ArrayList<String> idsList = bundle.getStringArrayList(Utils.RESPONSE_INAPP_PURCHASE_ID_LIST);
 
     List<Purchase> list = new ArrayList<>();
-
     for (int i = 0; i < purchaseDataList.size(); ++i) {
       String purchaseData = purchaseDataList.get(i);
       String signature = signatureList.get(i);
       String id = idsList.get(i);
 
-      JSONObject jsonElement = null;
+      JSONObject jsonElement;
       try {
         jsonElement = new JSONObject(purchaseData);
-        String orderId = jsonElement.getString("orderId");
         String packageName = jsonElement.getString("packageName");
         String sku = jsonElement.getString("productId");
         long purchaseTime = jsonElement.getLong("purchaseTime");
         int purchaseState = jsonElement.getInt("purchaseState");
 
-        String developerPayload = null;
-        try {
-          if (jsonElement.getString("developerPayload") != null) {
-            developerPayload = jsonElement.getString("developerPayload");
-          }
-        } catch (org.json.JSONException e) {
-          Log.d("JSON:", " Field error" + e.getLocalizedMessage());
-        }
-
-        String token = null;
-        try {
-          if (jsonElement.getString("token") != null) {
-            token = jsonElement.getString("token");
-          }
-        } catch (org.json.JSONException e) {
-          Log.d("JSON:", " Field error " + e.getLocalizedMessage());
-        }
+        String developerPayload = getJsonString(jsonElement, DEV_PAYLOAD_KEY);
+        boolean isAutoRenewing = getJsonBoolean(jsonElement, AUTO_RENEW_KEY);
+        String token = getJsonString(jsonElement, TOKEN_KEY);
 
         if (token == null) {
           token = jsonElement.getString("purchaseToken");
         }
-        boolean isAutoRenewing = false;
-        try {
-          if (jsonElement.getString("autoRenewing") != null) {
-            isAutoRenewing = jsonElement.getBoolean("autoRenewing");
-          }
-        } catch (org.json.JSONException e) {
-          Log.d("JSON:", " Field error " + e.getLocalizedMessage());
-        }
+
         //Base64 decoded string
         byte[] decodedSignature = Base64.decode(signature, Base64.DEFAULT);
         list.add(
@@ -92,20 +74,20 @@ public class AndroidBillingMapper {
   }
 
   public static SkuDetailsResult mapBundleToHashMapSkuDetails(String skuType, Bundle bundle) {
-    HashMap<String, Object> hashMap = new HashMap<String, Object>();
-    ArrayList<SkuDetails> arrayList = new ArrayList<SkuDetails>();
+    ArrayList<SkuDetails> arrayList = new ArrayList<>();
 
-    if (bundle.containsKey("DETAILS_LIST")) {
-      ArrayList<String> responseList = bundle.getStringArrayList("DETAILS_LIST");
-      for (String value : responseList) {
-        SkuDetails skuDetails = parseSkuDetails(skuType, value);
-        arrayList.add(skuDetails);
+    if (bundle.containsKey(DETAILS_LIST_KEY)) {
+      ArrayList<String> responseList = bundle.getStringArrayList(DETAILS_LIST_KEY);
+      if (responseList != null) {
+        for (String value : responseList) {
+          SkuDetails skuDetails = parseSkuDetails(skuType, value);
+          arrayList.add(skuDetails);
+        }
       }
     }
     int responseCode = (int) bundle.get("RESPONSE_CODE");
-    SkuDetailsResult skuDetailsResult = new SkuDetailsResult(arrayList, responseCode);
 
-    return skuDetailsResult;
+    return new SkuDetailsResult(arrayList, responseCode);
   }
 
   public static SkuDetails parseSkuDetails(String skuType, String skuDetailsData) {
@@ -115,13 +97,13 @@ public class AndroidBillingMapper {
       String sku = jsonElement.getString("productId");
       String type = jsonElement.getString("type");
       String price = jsonElement.getString("price");
-      Long priceAmountMicros = jsonElement.getLong("price_amount_micros");
+      long priceAmountMicros = jsonElement.getLong("price_amount_micros");
       String priceCurrencyCode = jsonElement.getString("price_currency_code");
       String appcPrice = jsonElement.getString("appc_price");
-      Long appcPriceAmountMicros = jsonElement.getLong("appc_price_amount_micros");
+      long appcPriceAmountMicros = jsonElement.getLong("appc_price_amount_micros");
       String appcPriceCurrencyCode = jsonElement.getString("appc_price_currency_code");
       String fiatPrice = jsonElement.getString("fiat_price");
-      Long fiatPriceAmountMicros = jsonElement.getLong("fiat_price_amount_micros");
+      long fiatPriceAmountMicros = jsonElement.getLong("fiat_price_amount_micros");
       String fiatPriceCurrencyCode = jsonElement.getString("fiat_price_currency_code");
       String title = jsonElement.getString("title");
       String description = jsonElement.getString("description");
@@ -138,15 +120,13 @@ public class AndroidBillingMapper {
 
   public static LaunchBillingFlowResult mapBundleToHashMapGetIntent(Bundle bundle) {
 
-    LaunchBillingFlowResult launchBillingFlowResult =
-        new LaunchBillingFlowResult(bundle.get("RESPONSE_CODE"),
-            bundle.getParcelable("BUY_INTENT"));
-
-    return launchBillingFlowResult;
+    return new LaunchBillingFlowResult(bundle.get(RESPONSE_CODE_KEY),
+        bundle.getParcelable("BUY_INTENT"));
   }
 
-  public static ArrayList<SkuDetails> mapSkuDetailsFromWS(String skuType, String skuDetailsResponse) {
-    ArrayList<SkuDetails> skuDetailsList = new ArrayList<SkuDetails>();
+  public static ArrayList<SkuDetails> mapSkuDetailsFromWS(String skuType,
+      String skuDetailsResponse) {
+    ArrayList<SkuDetails> skuDetailsList = new ArrayList<>();
 
     if (!skuDetailsResponse.equals("")) {
       try {
@@ -159,10 +139,10 @@ public class AndroidBillingMapper {
 
           JSONObject priceObj = obj.getJSONObject("price");
 
-          String price = getFiatPrice(priceObj.getJSONObject("fiat"));
-          long priceAmountMicros = getFiatAmountInMicros(priceObj.getJSONObject("fiat"));
-          String priceCurrencyCode = getFiatCurrencyCode(priceObj.getJSONObject("fiat"));
-          if (priceObj.has("base") && priceObj.getString("base")
+          String price = getFiatPrice(priceObj.getJSONObject(FIAT_KEY));
+          long priceAmountMicros = getFiatAmountInMicros(priceObj.getJSONObject(FIAT_KEY));
+          String priceCurrencyCode = getFiatCurrencyCode(priceObj.getJSONObject(FIAT_KEY));
+          if (priceObj.has(BASE_KEY) && priceObj.getString(BASE_KEY)
               .equalsIgnoreCase(APPC)) {
             price = getAppcPrice(priceObj);
             priceAmountMicros = getAppcAmountInMicros(priceObj);
@@ -171,22 +151,19 @@ public class AndroidBillingMapper {
 
           String appcPrice = getAppcPrice(priceObj);
           long appcPriceAmountMicros = getAppcAmountInMicros(priceObj);
-          String appcPriceCurrencyCode = APPC;
 
-          String fiatPrice = getFiatPrice(priceObj.getJSONObject("fiat"));
-          long fiatPriceAmountMicros = getFiatAmountInMicros(priceObj.getJSONObject("fiat"));
-          String fiatPriceCurrencyCode = getFiatCurrencyCode(priceObj.getJSONObject("fiat"));
-
-          String type = skuType;
+          String fiatPrice = getFiatPrice(priceObj.getJSONObject(FIAT_KEY));
+          long fiatPriceAmountMicros = getFiatAmountInMicros(priceObj.getJSONObject(FIAT_KEY));
+          String fiatPriceCurrencyCode = getFiatCurrencyCode(priceObj.getJSONObject(FIAT_KEY));
 
           String title = escapeString(obj.getString("label"));
 
           String description = escapeString(obj.getString("description"));
 
           SkuDetails skuDetails =
-              new SkuDetails(skuType, sku, type, price, priceAmountMicros, priceCurrencyCode,
-                  appcPrice, appcPriceAmountMicros, appcPriceCurrencyCode, fiatPrice,
-                  fiatPriceAmountMicros, fiatPriceCurrencyCode, title, description);
+              new SkuDetails(skuType, sku, skuType, price, priceAmountMicros, priceCurrencyCode,
+                  appcPrice, appcPriceAmountMicros, APPC, fiatPrice, fiatPriceAmountMicros,
+                  fiatPriceCurrencyCode, title, description);
 
           skuDetailsList.add(skuDetails);
         }
@@ -207,7 +184,8 @@ public class AndroidBillingMapper {
         case '"':
         case '\\':
         case '/':
-          str.append('\\').append(c);
+          str.append('\\')
+              .append(c);
           break;
         case '\t':
           str.append("\\t");
@@ -225,21 +203,19 @@ public class AndroidBillingMapper {
           str.append("\\f");
           break;
         default:
-            str.append(c);
+          str.append(c);
           break;
       }
     }
     return str.toString();
   }
 
-
   private static String getAppcPrice(JSONObject parentObject) throws JSONException {
     return String.format("%s %s", parentObject.getString("appc"), APPC);
   }
 
   private static long getAppcAmountInMicros(JSONObject parentObject) throws JSONException {
-    double price = parentObject.getDouble("appc") * 1000000;
-    return (long) price;
+    return (long) parentObject.getDouble("appc") * 1000000;
   }
 
   private static String getFiatPrice(JSONObject parentObject) throws JSONException {
@@ -250,13 +226,34 @@ public class AndroidBillingMapper {
   }
 
   private static long getFiatAmountInMicros(JSONObject parentObject) throws JSONException {
-    double price = parentObject.getDouble("value") * 1000000;
-    return (long) price;
+    return (long) parentObject.getDouble("value") * 1000000;
   }
 
   private static String getFiatCurrencyCode(JSONObject parentObject) throws JSONException {
     return parentObject.getJSONObject("currency")
         .getString("code");
+  }
+
+  private static String getJsonString(JSONObject jsonElement, String jsonKey) {
+    String element = null;
+    try {
+      if (jsonElement.getString(jsonKey) != null) {
+        element = jsonElement.getString(jsonKey);
+      }
+    } catch (org.json.JSONException e) {
+      Log.d("JSON:", " Field error" + e.getLocalizedMessage());
+    }
+    return element;
+  }
+
+  private static boolean getJsonBoolean(JSONObject jsonElement, String jsonKey) {
+    boolean element = false;
+    try {
+      element = jsonElement.getBoolean(jsonKey);
+    } catch (org.json.JSONException e) {
+      Log.d("JSON:", " Field error" + e.getLocalizedMessage());
+    }
+    return element;
   }
 
   public static String mapSkuDetailsResponse(SkuDetails skuDetails) {

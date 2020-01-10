@@ -8,17 +8,16 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class EventLogger implements Runnable {
 
-  public static String ENTITY_NAME = "SDK";
-
   private final String BASE_URL = "https://ws75.aptoide.com/api/7/";
   private final String SERVICE_PATH = "user/addEvent/action=CLICK/context=BILLING_SDK/name=";
-  private final String purchaseEventName = "PURCHASE_INTENT";
+  private final String PURCHASE_INTENT_NAME = "PURCHASE_INTENT";
   private String sku;
   private String appPackage;
 
@@ -28,7 +27,6 @@ public class EventLogger implements Runnable {
   }
 
   public void LogPurchaseEvent() throws JSONException {
-    String eventName = purchaseEventName;
 
     int sdkVersionCode = BuildConfig.VERSION_CODE;
     String sdkPackageName = BuildConfig.APPLICATION_ID;
@@ -50,14 +48,13 @@ public class EventLogger implements Runnable {
 
     jsonObj.put("data", dataObj);
 
-    String finalURL = BASE_URL + SERVICE_PATH + eventName;
+    String finalURL = BASE_URL + SERVICE_PATH + PURCHASE_INTENT_NAME;
 
     PostDataToURL(finalURL, jsonObj);
   }
 
   private void PostDataToURL(String urlStr, JSONObject jsonObj) {
-    URL url = null;
-    String responseStr = "";
+    URL url;
 
     try {
       url = new URL(urlStr);
@@ -78,10 +75,10 @@ public class EventLogger implements Runnable {
       int code = connection.getResponseCode();
       System.out.println(code);
 
-      BufferedReader br =
-          new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"));
+      BufferedReader br = new BufferedReader(
+          new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
       StringBuilder response = new StringBuilder();
-      String responseLine = null;
+      String responseLine;
       while ((responseLine = br.readLine()) != null) {
         response.append(responseLine.trim());
       }
@@ -91,13 +88,10 @@ public class EventLogger implements Runnable {
       }
       br.close();
     } catch (MalformedURLException e) {
-      responseStr = "";
       e.printStackTrace();
     } catch (ProtocolException e) {
-      responseStr = "";
       e.printStackTrace();
     } catch (IOException e) {
-      responseStr = "";
       e.printStackTrace();
     }
   }

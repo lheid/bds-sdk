@@ -12,19 +12,20 @@ import android.os.Bundle;
 
 public class LifeCycleListener implements Application.ActivityLifecycleCallbacks {
 
+  private static final String TAG = LifeCycleListener.class.getSimpleName();
   private static LifeCycleListener instance;
+  private int started = -1;
+  private int resumed = -1;
+  private Listener listener;
 
   /**
    * Method to initialize the lifecycle listener.
    *
    * @param application The application context.
    */
-  public static LifeCycleListener init(Application application) {
-    if (instance == null) {
-      instance = new LifeCycleListener();
-      application.registerActivityLifecycleCallbacks(instance);
-    }
-    return instance;
+  private static void init(Application application) {
+    instance = new LifeCycleListener();
+    application.registerActivityLifecycleCallbacks(instance);
   }
 
   /**
@@ -39,9 +40,6 @@ public class LifeCycleListener implements Application.ActivityLifecycleCallbacks
     return instance;
   }
 
-  private int started = -1;
-  private int resumed = -1;
-
   private boolean isAppStarted() {
     return started != -1;
   }
@@ -53,14 +51,6 @@ public class LifeCycleListener implements Application.ActivityLifecycleCallbacks
   public void setListener(Listener listener) {
     this.listener = listener;
   }
-
-  public interface Listener {
-    void onBecameForeground(Activity activity);
-
-    void onBecameBackground();
-  }
-
-  private Listener listener;
 
   @Override public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
   }
@@ -78,8 +68,6 @@ public class LifeCycleListener implements Application.ActivityLifecycleCallbacks
     }
     resumed = activity.hashCode();
   }
-
-  private static final String TAG = LifeCycleListener.class.getSimpleName();
 
   @Override public void onActivityPaused(Activity activity) {
     if (resumed == activity.hashCode()) {
@@ -101,5 +89,11 @@ public class LifeCycleListener implements Application.ActivityLifecycleCallbacks
 
   @Override public void onActivityDestroyed(Activity activity) {
 
+  }
+
+  public interface Listener {
+    void onBecameForeground(Activity activity);
+
+    void onBecameBackground();
   }
 }

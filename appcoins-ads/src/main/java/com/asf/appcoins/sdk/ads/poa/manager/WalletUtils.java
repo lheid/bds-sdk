@@ -73,8 +73,8 @@ public class WalletUtils {
   }
 
   private static String chooseServiceToBind(List<String> packageNameServices) {
-    String[] packagesOrded = BuildConfig.SERVICE_BIND_LIST.split(",");
-    for (String address : packagesOrded) {
+    String[] packagesOrdered = BuildConfig.SERVICE_BIND_LIST.split(",");
+    for (String address : packagesOrdered) {
       if (packageNameServices.contains(address)) {
         return address;
       }
@@ -275,8 +275,6 @@ public class WalletUtils {
       e.printStackTrace();
     }
 
-    Notification notification = builder.build();
-
-    return notification;
+    return builder.build();
   }
 }

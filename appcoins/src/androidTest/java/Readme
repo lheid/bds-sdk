@@ -1,0 +1,2 @@
+This module exists to reduce the number of imports necessary to use the sdk
+Instead of importing appcoins-ads and android-appcoins-billing, you can just import this module

@@ -11,19 +11,18 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
  */
 public final class AppCoinsAddressProxyBuilder {
 
+  private static final int ROPSTEN_NETWORK = 3;
+
   public AppCoinsAddressProxySdk createAddressProxySdk() {
     return new BdsAppCoinsAddressProxySdk(new RemoteRepository(this::provideApi));
   }
 
   private RemoteRepository.Api provideApi(int chainId) {
     String baseHost;
-    switch (chainId) {
-      case 3:
-        baseHost = BuildConfig.ROPSTEN_NETWORK_BACKEND_BASE_HOST;
-        break;
-      default:
-        baseHost = BuildConfig.MAIN_NETWORK_BACKEND_BASE_HOST;
-        break;
+    if (chainId == ROPSTEN_NETWORK) {
+      baseHost = BuildConfig.ROPSTEN_NETWORK_BACKEND_BASE_HOST;
+    } else {
+      baseHost = BuildConfig.MAIN_NETWORK_BACKEND_BASE_HOST;
     }
 
     return new Retrofit.Builder().baseUrl(baseHost)
@@ -32,6 +31,5 @@ public final class AppCoinsAddressProxyBuilder {
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .build()
         .create(RemoteRepository.Api.class);
-
   }
 }

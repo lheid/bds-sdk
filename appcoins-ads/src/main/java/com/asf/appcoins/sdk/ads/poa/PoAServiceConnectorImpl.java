@@ -18,7 +18,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import com.asf.appcoins.sdk.ads.BuildConfig;
-import com.asf.appcoins.sdk.ads.WalletPoAServiceListenner;
+import com.asf.appcoins.sdk.ads.WalletPoAServiceListener;
 import com.asf.appcoins.sdk.ads.poa.manager.WalletUtils;
 import java.util.ArrayList;
 
@@ -29,22 +29,13 @@ public class PoAServiceConnectorImpl implements PoAServiceConnector {
   private static final String TAG = PoAServiceConnectorImpl.class.getSimpleName();
   /** Flag indicating whether the connector is bound to the service. */
   private static boolean isBound;
-  /**
-   * Target we publish for clients to send messages to IncomingHandler. Note
-   * that calls to its binder are sequential!
-   */
-  private final IncomingHandler handler;
-  /**
-   * Handler thread to avoid running on the main thread (UI)
-   */
-  private final HandlerThread handlerThread;
   /** Messenger for sending messages to the service. */
   private Messenger serviceMessenger = null;
   /** Messenger for receiving messages from the service. */
-  private Messenger clientMessenger = null;
+  private Messenger clientMessenger;
   /** Lists of messages that are pending to be send */
   private ArrayList<Message> pendingMsgsList = new ArrayList<>();
-  private WalletPoAServiceListenner walletPoAServiceListenner;
+  private WalletPoAServiceListener walletPoAServiceListener;
   private int networkId;
 
   /**
@@ -54,7 +45,7 @@ public class PoAServiceConnectorImpl implements PoAServiceConnector {
     @Override public void onServiceConnected(ComponentName className, IBinder service) {
       serviceMessenger = new Messenger(service);
       isBound = true;
-      walletPoAServiceListenner.isConnected();
+      walletPoAServiceListener.isConnected();
       // send the pending messages that may have been added to the list before the bind was complete
       sendPendingMessages();
     }
@@ -71,17 +62,24 @@ public class PoAServiceConnectorImpl implements PoAServiceConnector {
    * The constructor for the connector implementation.
    */
   public PoAServiceConnectorImpl(ArrayList<MessageListener> listeners, int networkId) {
-    handlerThread = new HandlerThread("HandlerThread");
+    /**
+     * Handler thread to avoid running on the main thread (UI)
+     */
+    HandlerThread handlerThread = new HandlerThread("HandlerThread");
     handlerThread.start();
-    handler = new IncomingHandler(handlerThread, listeners);
+    /**
+     * Target we publish for clients to send messages to IncomingHandler. Note
+     * that calls to its binder are sequential!
+     */
+    IncomingHandler handler = new IncomingHandler(handlerThread, listeners);
     clientMessenger = new Messenger(handler);
     this.networkId = networkId;
   }
 
   @Override public boolean connectToService(Context context,
-      WalletPoAServiceListenner walletPoAServiceListenner) {
+      WalletPoAServiceListener walletPoAServiceListener) {
 
-    this.walletPoAServiceListenner = walletPoAServiceListenner;
+    this.walletPoAServiceListener = walletPoAServiceListener;
     startWalletPoaService(context);
 
     boolean result;

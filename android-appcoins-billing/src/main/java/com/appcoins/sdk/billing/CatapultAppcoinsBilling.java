@@ -94,8 +94,8 @@ public class CatapultAppcoinsBilling implements AppcoinsBillingClient {
 
   @Override public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == REQUEST_CODE) {
-      ApplicationUtils.handleActivityResult(billing, resultCode, data, purchaseFinishedListener);
-      return true;
+      return ApplicationUtils.handleActivityResult(billing, resultCode, data,
+          purchaseFinishedListener);
     }
     return false;
   }

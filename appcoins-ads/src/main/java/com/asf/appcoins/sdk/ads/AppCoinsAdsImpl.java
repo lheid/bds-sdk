@@ -17,7 +17,7 @@ import static com.asf.appcoins.sdk.ads.poa.MessageListener.MSG_SET_NETWORK;
 
 final class AppCoinsAdsImpl implements AppCoinsAds {
 
-  private static final String ADS_PREFERENCES = "AppCoinsAds";
+  private static final String PACKAGE_NAME_KEY = "packageName";
 
   private final PoAServiceConnector poaConnector;
   private Context context;
@@ -31,21 +31,21 @@ final class AppCoinsAdsImpl implements AppCoinsAds {
   @Override public void sendProof() {
     long timestamp = System.currentTimeMillis();
     Bundle bundle = new Bundle();
-    bundle.putString("packageName", context.getPackageName());
+    bundle.putString(PACKAGE_NAME_KEY, context.getPackageName());
     bundle.putLong("timeStamp", timestamp);
     poaConnector.sendMessage(context, MSG_SEND_PROOF, bundle);
   }
 
   @Override public void registerCampaign(String campaignId) {
     Bundle bundle = new Bundle();
-    bundle.putString("packageName", context.getPackageName());
+    bundle.putString(PACKAGE_NAME_KEY, context.getPackageName());
     bundle.putString("campaignId", campaignId);
     poaConnector.sendMessage(context, MSG_REGISTER_CAMPAIGN, bundle);
   }
 
   @Override public void setNetwork(int networkId) {
     Bundle bundle = new Bundle();
-    bundle.putString("packageName", context.getPackageName());
+    bundle.putString(PACKAGE_NAME_KEY, context.getPackageName());
     bundle.putInt("networkId", networkId);
     poaConnector.sendMessage(context, MSG_SET_NETWORK, bundle);
   }

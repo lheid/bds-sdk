@@ -9,12 +9,12 @@ public class AppcoinsAdvertisementRepository implements ConnectionLifeCycle {
 
   private AppCoinsAdvertising service;
 
-  @Override public void onConnect(IBinder service, AppcoinsAdvertisementListenner listener) {
+  @Override public void onConnect(IBinder service, AppcoinsAdvertisementListener listener) {
     this.service = AppCoinsAdvertising.Stub.asInterface(service);
     listener.onAdvertisementFinished(ResponseCode.OK.getValue());
   }
 
-  @Override public void onDisconnect(AppcoinsAdvertisementListenner listener) {
+  @Override public void onDisconnect(AppcoinsAdvertisementListener listener) {
 
   }
 

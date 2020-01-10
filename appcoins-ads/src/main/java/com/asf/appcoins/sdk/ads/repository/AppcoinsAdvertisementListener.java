@@ -1,5 +1,5 @@
 package com.asf.appcoins.sdk.ads.repository;
 
-public interface AppcoinsAdvertisementListenner {
+public interface AppcoinsAdvertisementListener {
   void onAdvertisementFinished(int responseCode);
 }

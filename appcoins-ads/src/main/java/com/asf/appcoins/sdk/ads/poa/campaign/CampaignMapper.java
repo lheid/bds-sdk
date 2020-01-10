@@ -1,6 +1,5 @@
 package com.asf.appcoins.sdk.ads.poa.campaign;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import com.asf.appcoins.sdk.ads.network.responses.AppCoinsClientResponse;
@@ -15,17 +14,15 @@ public class CampaignMapper {
     String jsonResponse = response.getMsg();
     String bigIdString = GetBigIntValue("bidId", jsonResponse);
     if (!bigIdString.isEmpty()) {
-      BigInteger bigId = new BigInteger(bigIdString);
       String packageName = GetStringValue("packageName", jsonResponse);
       if (!packageName.isEmpty()) {
-        Campaign campaign = new Campaign(bigId, packageName);
-        return campaign;
+        return new Campaign(new BigInteger(bigIdString), packageName);
       }
     }
-    return new Campaign( new BigInteger(Integer.toString(Campaign.INVALID_CAMPAIGN)) , "");
+    return new Campaign(new BigInteger(Integer.toString(Campaign.INVALID_CAMPAIGN)), "");
   }
 
-  public static String GetBigIntValue(String paramName, String response) {
+  private static String GetBigIntValue(String paramName, String response) {
 
     String patternStr = "(?:\"" + paramName + "\"" + "[\\s]*:[\\s]*)([\\d]*)";
 
@@ -34,8 +31,7 @@ public class CampaignMapper {
     boolean found = matcher.find();
 
     if (found) {
-      String val = matcher.group(1);
-      return val;
+      return matcher.group(1);
     }
 
     return "";

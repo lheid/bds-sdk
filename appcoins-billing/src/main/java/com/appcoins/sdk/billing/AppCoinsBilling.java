@@ -20,10 +20,10 @@ public class AppCoinsBilling implements Billing {
       PurchasesResult purchasesResult = repository.getPurchases(skuType);
 
       if (purchasesResult.getResponseCode() != ResponseCode.OK.getValue()) {
-        return new PurchasesResult(new ArrayList<Purchase>(), purchasesResult.getResponseCode());
+        return new PurchasesResult(new ArrayList<>(), purchasesResult.getResponseCode());
       }
 
-      ArrayList<Purchase> invalidPurchase = new ArrayList<Purchase>();
+      ArrayList<Purchase> invalidPurchase = new ArrayList<>();
       for (Purchase purchase : purchasesResult.getPurchases()) {
         String purchaseData = purchase.getOriginalJson();
         byte[] decodeSignature = purchase.getSignature();
@@ -45,10 +45,6 @@ public class AppCoinsBilling implements Billing {
     }
   }
 
-  public boolean verifyPurchase(String purchaseData, byte[] decodeSignature) {
-    return Security.verifyPurchase(base64DecodedPublicKey, purchaseData, decodeSignature);
-  }
-
   @Override public void querySkuDetailsAsync(SkuDetailsParams skuDetailsParams,
       SkuDetailsResponseListener onSkuDetailsResponseListener) {
     SkuDetailsAsync skuDetailsAsync =
@@ -67,11 +63,7 @@ public class AppCoinsBilling implements Billing {
   public LaunchBillingFlowResult launchBillingFlow(BillingFlowParams params, String payload)
       throws ServiceConnectionException {
     try {
-
-      LaunchBillingFlowResult result =
-          repository.launchBillingFlow(params.getSkuType(), params.getSku(), payload);
-
-      return result;
+      return repository.launchBillingFlow(params.getSkuType(), params.getSku(), payload);
     } catch (ServiceConnectionException e) {
       e.printStackTrace();
       throw new ServiceConnectionException(e.getMessage());
@@ -80,5 +72,9 @@ public class AppCoinsBilling implements Billing {
 
   @Override public boolean isReady() {
     return repository.isReady();
+  }
+
+  public boolean verifyPurchase(String purchaseData, byte[] decodeSignature) {
+    return Security.verifyPurchase(base64DecodedPublicKey, purchaseData, decodeSignature);
   }
 }

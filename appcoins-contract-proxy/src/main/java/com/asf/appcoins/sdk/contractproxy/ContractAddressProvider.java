@@ -7,15 +7,13 @@ import io.reactivex.schedulers.Schedulers;
 import java.util.Map;
 
 public class ContractAddressProvider implements AppCoinsAddressProxySdk {
-  private int NETWORK_ROPSTEN = 3;
-
-  static final String APPCOINS_CONTRACT_ID = "appcoins";
-  static final String IAB_CONTRACT_ID = "appcoinsiab";
-  static final String ADVERTISEMENT_CONTRACT_ID = "advertisement";
-
+  private static final String APPCOINS_CONTRACT_ID = "appcoins";
+  private static final String IAB_CONTRACT_ID = "appcoinsiab";
+  private static final String ADVERTISEMENT_CONTRACT_ID = "advertisement";
   private final WalletAddressProvider walletProvider;
   private final Web3jProxyContract web3jProxyContract;
   private final Map<String, String> cache;
+  private int NETWORK_ROPSTEN = 3;
 
   public ContractAddressProvider(WalletAddressProvider walletProvider,
       Web3jProxyContract web3jProxyContract, Map<String, String> cache) {

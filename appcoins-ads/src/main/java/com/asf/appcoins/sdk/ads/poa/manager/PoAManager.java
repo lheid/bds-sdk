@@ -10,7 +10,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import com.asf.appcoins.sdk.ads.BuildConfig;
 import com.asf.appcoins.sdk.ads.LifeCycleListener;
-import com.asf.appcoins.sdk.ads.WalletPoAServiceListenner;
+import com.asf.appcoins.sdk.ads.WalletPoAServiceListener;
 import com.asf.appcoins.sdk.ads.network.AppCoinsClient;
 import com.asf.appcoins.sdk.ads.network.QueryParams;
 import com.asf.appcoins.sdk.ads.network.listeners.CheckConnectivityResponseListener;
@@ -23,7 +23,7 @@ import com.asf.appcoins.sdk.ads.poa.PoAServiceConnector;
 import com.asf.appcoins.sdk.ads.poa.campaign.Campaign;
 import com.asf.appcoins.sdk.ads.poa.campaign.CampaignMapper;
 import com.asf.appcoins.sdk.ads.repository.AppcoinsAdvertisementConnection;
-import com.asf.appcoins.sdk.ads.repository.AppcoinsAdvertisementListenner;
+import com.asf.appcoins.sdk.ads.repository.AppcoinsAdvertisementListener;
 import com.asf.appcoins.sdk.ads.repository.AppcoinsAdvertisementRepository;
 import com.asf.appcoins.sdk.ads.repository.AppcoinsAdvertisementThreadGetCampaign;
 import com.asf.appcoins.sdk.ads.repository.ResponseCode;
@@ -33,7 +33,6 @@ import static com.asf.appcoins.sdk.ads.poa.MessageListener.MSG_REGISTER_CAMPAIGN
 import static com.asf.appcoins.sdk.ads.poa.MessageListener.MSG_SEND_PROOF;
 import static com.asf.appcoins.sdk.ads.poa.MessageListener.MSG_SET_NETWORK;
 import static com.asf.appcoins.sdk.ads.poa.MessageListener.MSG_STOP_PROCESS;
-import static com.asf.appcoins.sdk.ads.poa.PoAServiceConnector.PREFERENCE_WALLET_PCKG_NAME;
 
 /**
  * Class that will manage the PoA process, by sending the proofs on the correct time. By handling
@@ -43,13 +42,14 @@ import static com.asf.appcoins.sdk.ads.poa.PoAServiceConnector.PREFERENCE_WALLET
  */
 
 public class PoAManager implements LifeCycleListener.Listener, CheckConnectivityResponseListener,
-    GetCampaignResponseListener, DialogVisibleListener, WalletPoAServiceListenner {
+    GetCampaignResponseListener, DialogVisibleListener, WalletPoAServiceListener {
 
-  public static final String TAG = PoAManager.class.getName();
+  private static final String TAG = PoAManager.class.getName();
   private static final String FINISHED_KEY = "finished";
   private static final int PREFERENCES_LISTENER_DELAY = 1000;
   /** The instance of the manager */
   private static PoAManager instance;
+  private static String POA_NOTIFICATION_VALUE = "POA_NOTIFICATION";
   private final SharedPreferences preferences;
   private final AppCoinsClient appcoinsClient;
   /** The connector with the wallet service, receiver of the messages of the PoA. */
@@ -73,17 +73,13 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
   /** The campaign ID value */
   private BigInteger campaignId;
   private boolean foreground = false;
-  private boolean dialogVisible = false;
-  boolean fromBackground = false;
+  private boolean fromBackground = false;
   private Handler handleRetryConnection = new Handler();
   private int connectionRetries = 0;
   private boolean isWalletInstalled;
   private AppcoinsAdvertisementRepository appcoinsAdvertisementRepository;
-  private AppcoinsAdvertisementConnection appcoinsAdvertisementConnection;
-  private static boolean showPopUpNotification;
-  private static String POA_NOTIFICATION_VALUE = "POA_NOTIFICATION";
 
-  public PoAManager(SharedPreferences preferences, PoAServiceConnector connector, Context context,
+  private PoAManager(SharedPreferences preferences, PoAServiceConnector connector, Context context,
       int networkId, AppCoinsClient appcoinsClient) {
     this.preferences = preferences;
     this.poaConnector = connector;
@@ -157,7 +153,7 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
    * preferences change listener. Then sends message to the listening wallet to stop the process
    * and call the finish process method.
    */
-  public void stopProcess() {
+  private void stopProcess() {
     if (processing) {
       if (sendProof != null) {
         handler.removeCallbacks(sendProof);
@@ -178,7 +174,7 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
   /**
    * Method that finish the process. The method simply disconnects from the bound service.
    */
-  public void finishProcess() {
+  private void finishProcess() {
     Log.d(TAG, "Finishing process.");
     processing = false;
     proofsSent = 0;
@@ -296,7 +292,6 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
   }
 
   @Override public void OnDialogVisibleListener(boolean value) {
-    dialogVisible = value;
   }
 
   /*
@@ -378,7 +373,6 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
     if (!getSharedPreferencesBoolean(POA_NOTIFICATION_VALUE)) {
       Log.d(TAG, "Prompting Notification Install");
       setSharedPreferencesBoolean(POA_NOTIFICATION_VALUE, true);
-      showPopUpNotification = true;
       spHandler.post(new Runnable() {
         @Override public void run() {
           WalletUtils.createInstallWalletNotification();
@@ -389,10 +383,10 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
 
   private void startWalletConnection() {
     appcoinsAdvertisementRepository = new AppcoinsAdvertisementRepository();
-    appcoinsAdvertisementConnection =
+    AppcoinsAdvertisementConnection appcoinsAdvertisementConnection =
         new AppcoinsAdvertisementConnection(appContext, appcoinsAdvertisementRepository);
     final PoAManager p = this;
-    appcoinsAdvertisementConnection.startConnection(new AppcoinsAdvertisementListenner() {
+    appcoinsAdvertisementConnection.startConnection(new AppcoinsAdvertisementListener() {
       @Override public void onAdvertisementFinished(int responseCode) {
         if (responseCode == ResponseCode.OK.getValue()) {
           Log.d(TAG, "Retrieving the Campaign by the Wallet");
@@ -419,7 +413,7 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
   }
 
   /*
-   * New listenner to be called when connection to WalletPoaService is succefully done.
+   * New listener to be called when connection to WalletPoaService is succefully done.
    */
   @Override public void isConnected() {
     try {

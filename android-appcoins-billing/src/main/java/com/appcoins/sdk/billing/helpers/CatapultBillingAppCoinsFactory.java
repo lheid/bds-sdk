@@ -14,7 +14,7 @@ public class CatapultBillingAppCoinsFactory {
       PurchasesUpdatedListener purchaseFinishedListener) {
 
     AppCoinsAndroidBillingRepository repository =
-        new AppCoinsAndroidBillingRepository(3, context.getPackageName());
+        new AppCoinsAndroidBillingRepository(Utils.API_VERSION, context.getPackageName());
 
     RepositoryServiceConnection connection = new RepositoryServiceConnection(context, repository);
     WalletUtils.setContext(context);

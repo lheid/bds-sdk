@@ -26,6 +26,7 @@ android {
 }
 
 dependencies {
+  api project(':appcoins-billing')
   api project(':appcoins-ads')
 }
 

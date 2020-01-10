@@ -14,7 +14,6 @@ class ApplicationUtils {
 
   private static final String RESPONSE_INAPP_PURCHASE_DATA = "INAPP_PURCHASE_DATA";
   private static final String RESPONSE_INAPP_SIGNATURE = "INAPP_DATA_SIGNATURE";
-  private static final String RESPONSE_INAPP_PURCHASE_ID = "INAPP_PURCHASE_ID";
 
   private final static String TAG = ApplicationUtils.class.getSimpleName();
 
@@ -40,8 +39,7 @@ class ApplicationUtils {
 
       if (purchaseData == null || dataSignature == null) {
         logError("BUG: either purchaseData or dataSignature is null.");
-        logDebug("Extras: " + data.getExtras()
-            .toString());
+        logDebug("Extras: " + data.getExtras());
         purchaseFinishedListener.onPurchasesUpdated(ResponseCode.ERROR.getValue(),
             Collections.<Purchase>emptyList());
 
@@ -49,7 +47,7 @@ class ApplicationUtils {
       }
 
       if (billing.verifyPurchase(purchaseData, Base64.decode(dataSignature, Base64.DEFAULT))) {
-        JSONObject purchaseDataJSON = null;
+        JSONObject purchaseDataJSON;
         try {
           purchaseDataJSON = new JSONObject(purchaseData);
           Purchase purchase =

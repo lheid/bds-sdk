@@ -8,8 +8,6 @@ public class TranslationsModel implements Serializable {
   private String languageCode;
   private String countryCode;
   private String installationButtonString;
-  private String poaNotificationTitle;
-  private String poaNotificationBody;
   private String installationDialogBody;
   private String dialogStringHighlight;
   private String skipButtonString;
@@ -28,8 +26,6 @@ public class TranslationsModel implements Serializable {
     installationButtonString = list.get(3);
     alertDialogMessage = list.get(4);
     alertDialogDismissButton = list.get(5);
-    poaNotificationTitle = list.get(6);
-    poaNotificationBody = list.get(7);
   }
 
   public String getLanguageCode() {
@@ -42,14 +38,6 @@ public class TranslationsModel implements Serializable {
 
   public String getInstallationButtonString() {
     return installationButtonString;
-  }
-
-  public String getPoaNotificationTitle() {
-    return poaNotificationTitle;
-  }
-
-  public String getPoaNotificationBody() {
-    return poaNotificationBody;
   }
 
   public String getInstallationDialogBody() {

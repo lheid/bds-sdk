@@ -29,8 +29,8 @@ public class PayloadHelper {
    *
    * @return The final developers payload to be sent
    */
-  public static String buildIntentPayload( String orderReference,
-      String developerPayload, String origin) {
+  public static String buildIntentPayload(String orderReference, String developerPayload,
+      String origin) {
     Uri.Builder builder = new Uri.Builder();
     builder.scheme(SCHEME)
         .authority("appcoins.io");
@@ -65,7 +65,7 @@ public class PayloadHelper {
       return null;
     }
     Uri uri = Uri.parse(uriString);
-    if (!uri.getScheme()
+    if (uri.getScheme() == null || !uri.getScheme()
         .equalsIgnoreCase(SCHEME)) {
       throw new IllegalArgumentException();
     }
@@ -74,13 +74,11 @@ public class PayloadHelper {
 
   public static String getOrderReference(String uriString) {
     Uri uri = checkRequirements(uriString);
-    if (uri == null) return null;
     return uri.getQueryParameter(ORDER_PARAMETER);
   }
 
   public static String getOrigin(String uriString) {
     Uri uri = checkRequirements(uriString);
-    if (uri == null) return null;
     return uri.getQueryParameter(ORIGIN_PARAMETER);
   }
 }

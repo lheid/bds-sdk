@@ -4,8 +4,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import com.asf.appcoins.sdk.ads.network.listeners.GetCampaignResponseListener;
 
-public class
-AppcoinsAdvertisementThreadGetCampaign implements Runnable {
+public class AppcoinsAdvertisementThreadGetCampaign implements Runnable {
 
   private GetCampaignResponseListener getCampaignResponseListener;
   private AppcoinsAdvertisementRepository appcoinsAdvertisementRepository;
@@ -20,7 +19,7 @@ AppcoinsAdvertisementThreadGetCampaign implements Runnable {
   @Override public void run() {
     try {
       Bundle response = appcoinsAdvertisementRepository.getAvailableCampaign();
-      if(response != null){
+      if (response != null) {
         getCampaignResponseListener.responseGetCampaignWallet(response);
       }
     } catch (RemoteException e) {
