@@ -14,12 +14,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import com.asf.appcoins.sdk.ads.BuildConfig;
-import com.asf.appcoins.sdk.ads.listeners.CafeBazaarResponseAsync;
-import com.asf.appcoins.sdk.ads.listeners.ResponseListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,8 +123,9 @@ public class WalletUtils {
 
     if (isAppInstalled(BuildConfig.CAFE_BAZAAR_PACKAGE_NAME, packageManager) && isAbleToRedirect(
         intent, packageManager)) {
-      checkWalletAvailability(packageManager);
-      return;
+      intent.setPackage(BuildConfig.CAFE_BAZAAR_PACKAGE_NAME);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+      buildNotification(intent);
     } else {
       intent = redirectToRemainingStores(packageManager);
     }
@@ -135,25 +133,6 @@ public class WalletUtils {
     if (intent != null) {
       createNotification(intent);
     }
-  }
-
-  private static void checkWalletAvailability(final PackageManager packageManager) {
-    AsyncTask asyncTask = new CafeBazaarResponseAsync(new ResponseListener() {
-      @Override public void onResponseCode(int code) {
-        Intent listenerIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(CAFE_BAZAAR_URL));
-        if (code < 300) {
-          listenerIntent.setPackage(BuildConfig.CAFE_BAZAAR_PACKAGE_NAME);
-          listenerIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-          buildNotification(listenerIntent);
-        } else {
-          listenerIntent = redirectToRemainingStores(packageManager);
-        }
-        if (listenerIntent != null) {
-          createNotification(listenerIntent);
-        }
-      }
-    });
-    asyncTask.execute();
   }
 
   private static Intent redirectToRemainingStores(PackageManager packageManager) {

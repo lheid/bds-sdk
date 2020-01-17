@@ -15,7 +15,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -270,17 +269,8 @@ public class InstallDialogActivity extends Activity {
     final Intent cafeBazaarIntent = buildBrowserIntent(CAFE_BAZAAR_URL);
     if (WalletUtils.isAppInstalled(BuildConfig.CAFE_BAZAAR_PACKAGE_NAME, getPackageManager())
         && isAbleToRedirect(cafeBazaarIntent)) {
-      AsyncTask asyncTask = new CafeBazaarResponseAsync(new ResponseListener() {
-        @Override public void onResponseCode(int code) {
-          if (code < 300) {
-            cafeBazaarIntent.setPackage(BuildConfig.CAFE_BAZAAR_PACKAGE_NAME);
-            startActivity(cafeBazaarIntent);
-          } else {
-            redirectToRemainingStores(storeUrl);
-          }
-        }
-      });
-      asyncTask.execute();
+      cafeBazaarIntent.setPackage(BuildConfig.CAFE_BAZAAR_PACKAGE_NAME);
+      startActivity(cafeBazaarIntent);
     } else {
       redirectToRemainingStores(storeUrl);
     }
