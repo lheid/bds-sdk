@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import com.appcoins.billing.AppcoinsBilling;
 import com.appcoins.billing.sdk.BuildConfig;
@@ -26,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public final class AppcoinsBillingStubHelper implements AppcoinsBilling, Serializable {
-  final static String BUY_ITEM_PROPERTIES = "buy_item_properties";
+  public final static String BUY_ITEM_PROPERTIES = "buy_item_properties";
   private static final String TAG = AppcoinsBillingStubHelper.class.getSimpleName();
   private final static String APPCOINS_BILLING_STUB_HELPER_INSTANCE =
       "appcoins_billing_stub_helper";
@@ -177,7 +176,7 @@ public final class AppcoinsBillingStubHelper implements AppcoinsBilling, Seriali
     responseWs.putStringArrayList("DETAILS_LIST", skuDetails);
   }
 
-  private ArrayList<SkuDetails> requestSkuDetails(@Nullable List<String> sku, String packageName,
+  private ArrayList<SkuDetails> requestSkuDetails(List<String> sku, String packageName,
       String type) {
     List<String> skuSendList = new ArrayList<>();
     ArrayList<SkuDetails> skuDetailsList = new ArrayList<>();

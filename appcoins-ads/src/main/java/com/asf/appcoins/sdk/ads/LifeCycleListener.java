@@ -23,9 +23,12 @@ public class LifeCycleListener implements Application.ActivityLifecycleCallbacks
    *
    * @param application The application context.
    */
-  private static void init(Application application) {
-    instance = new LifeCycleListener();
-    application.registerActivityLifecycleCallbacks(instance);
+  public static LifeCycleListener init(Application application) {
+    if (instance == null) {
+      instance = new LifeCycleListener();
+      application.registerActivityLifecycleCallbacks(instance);
+    }
+    return instance;
   }
 
   /**

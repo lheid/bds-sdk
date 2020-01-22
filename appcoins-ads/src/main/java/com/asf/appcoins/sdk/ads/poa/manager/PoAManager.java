@@ -10,7 +10,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import com.asf.appcoins.sdk.ads.BuildConfig;
 import com.asf.appcoins.sdk.ads.LifeCycleListener;
-import com.asf.appcoins.sdk.ads.WalletPoAServiceListener;
+import com.asf.appcoins.sdk.ads.WalletPoAServiceListenner;
 import com.asf.appcoins.sdk.ads.network.AppCoinsClient;
 import com.asf.appcoins.sdk.ads.network.QueryParams;
 import com.asf.appcoins.sdk.ads.network.listeners.CheckConnectivityResponseListener;
@@ -42,9 +42,9 @@ import static com.asf.appcoins.sdk.ads.poa.MessageListener.MSG_STOP_PROCESS;
  */
 
 public class PoAManager implements LifeCycleListener.Listener, CheckConnectivityResponseListener,
-    GetCampaignResponseListener, DialogVisibleListener, WalletPoAServiceListener {
+    GetCampaignResponseListener, DialogVisibleListener, WalletPoAServiceListenner {
 
-  private static final String TAG = PoAManager.class.getName();
+  public static final String TAG = PoAManager.class.getName();
   private static final String FINISHED_KEY = "finished";
   private static final int PREFERENCES_LISTENER_DELAY = 1000;
   /** The instance of the manager */
@@ -79,7 +79,7 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
   private boolean isWalletInstalled;
   private AppcoinsAdvertisementRepository appcoinsAdvertisementRepository;
 
-  private PoAManager(SharedPreferences preferences, PoAServiceConnector connector, Context context,
+  public PoAManager(SharedPreferences preferences, PoAServiceConnector connector, Context context,
       int networkId, AppCoinsClient appcoinsClient) {
     this.preferences = preferences;
     this.poaConnector = connector;
@@ -153,7 +153,7 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
    * preferences change listener. Then sends message to the listening wallet to stop the process
    * and call the finish process method.
    */
-  private void stopProcess() {
+  public void stopProcess() {
     if (processing) {
       if (sendProof != null) {
         handler.removeCallbacks(sendProof);
@@ -174,7 +174,7 @@ public class PoAManager implements LifeCycleListener.Listener, CheckConnectivity
   /**
    * Method that finish the process. The method simply disconnects from the bound service.
    */
-  private void finishProcess() {
+  public void finishProcess() {
     Log.d(TAG, "Finishing process.");
     processing = false;
     proofsSent = 0;

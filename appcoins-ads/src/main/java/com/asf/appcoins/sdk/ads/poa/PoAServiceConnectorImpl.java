@@ -18,7 +18,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import com.asf.appcoins.sdk.ads.BuildConfig;
-import com.asf.appcoins.sdk.ads.WalletPoAServiceListener;
+import com.asf.appcoins.sdk.ads.WalletPoAServiceListenner;
 import com.asf.appcoins.sdk.ads.poa.manager.WalletUtils;
 import java.util.ArrayList;
 
@@ -35,7 +35,7 @@ public class PoAServiceConnectorImpl implements PoAServiceConnector {
   private Messenger clientMessenger;
   /** Lists of messages that are pending to be send */
   private ArrayList<Message> pendingMsgsList = new ArrayList<>();
-  private WalletPoAServiceListener walletPoAServiceListener;
+  private WalletPoAServiceListenner walletPoAServiceListener;
   private int networkId;
 
   /**
@@ -77,7 +77,7 @@ public class PoAServiceConnectorImpl implements PoAServiceConnector {
   }
 
   @Override public boolean connectToService(Context context,
-      WalletPoAServiceListener walletPoAServiceListener) {
+      WalletPoAServiceListenner walletPoAServiceListener) {
 
     this.walletPoAServiceListener = walletPoAServiceListener;
     startWalletPoaService(context);

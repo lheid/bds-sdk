@@ -16,12 +16,12 @@ import java.util.concurrent.TimeUnit;
 
 public class CampaignService implements Runnable {
 
-  private static final String PACKAGE_NAME = "packageName";
-  private static final String VER_CODE = "vercode";
-  private static final String SORT = "sort";
-  private static final String BY = "by";
-  private static final String VALID = "valid";
-  private static final String TYPE = "type";
+  public static final String PACKAGE_NAME = "packageName";
+  public static final String VER_CODE = "vercode";
+  public static final String SORT = "sort";
+  public static final String BY = "by";
+  public static final String VALID = "valid";
+  public static final String TYPE = "type";
   final String serviceUrl;
   private final QueryParams params;
   private final Interceptor interceptor;

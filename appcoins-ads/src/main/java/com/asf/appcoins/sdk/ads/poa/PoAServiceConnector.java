@@ -3,7 +3,7 @@ package com.asf.appcoins.sdk.ads.poa;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
-import com.asf.appcoins.sdk.ads.WalletPoAServiceListener;
+import com.asf.appcoins.sdk.ads.WalletPoAServiceListenner;
 
 /**
  * Created by Joao Raimundo on 28/03/2018.
@@ -54,7 +54,7 @@ public interface PoAServiceConnector {
    *
    * @retun true if the bind was successful, false otherwise.
    */
-  boolean connectToService(Context context, WalletPoAServiceListener walletPoAServiceListener);
+  boolean connectToService(Context context, WalletPoAServiceListenner walletPoAServiceListener);
 
   /**
    * Method to unbind with the service that handles the PoA process.

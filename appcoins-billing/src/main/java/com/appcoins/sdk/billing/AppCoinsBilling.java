@@ -20,7 +20,7 @@ public class AppCoinsBilling implements Billing {
       PurchasesResult purchasesResult = repository.getPurchases(skuType);
 
       if (purchasesResult.getResponseCode() != ResponseCode.OK.getValue()) {
-        return new PurchasesResult(new ArrayList<>(), purchasesResult.getResponseCode());
+        return new PurchasesResult(new ArrayList<Purchase>(), purchasesResult.getResponseCode());
       }
 
       ArrayList<Purchase> invalidPurchase = new ArrayList<>();

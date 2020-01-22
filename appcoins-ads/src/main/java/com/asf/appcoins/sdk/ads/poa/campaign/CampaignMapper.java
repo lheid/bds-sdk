@@ -22,7 +22,7 @@ public class CampaignMapper {
     return new Campaign(new BigInteger(Integer.toString(Campaign.INVALID_CAMPAIGN)), "");
   }
 
-  private static String GetBigIntValue(String paramName, String response) {
+  public static String GetBigIntValue(String paramName, String response) {
 
     String patternStr = "(?:\"" + paramName + "\"" + "[\\s]*:[\\s]*)([\\d]*)";
 
